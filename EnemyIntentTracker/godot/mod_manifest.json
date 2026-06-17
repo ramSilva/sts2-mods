@@ -1,7 +1,7 @@
 {
   "name": "Enemy Intent Tracker",
   "author": "killermelga",
-  "description": "Hover any enemy to see a prediction of what they will do on their next turn.",
+  "description": "Hover any enemy to see a preview of what they will do on their next turn.",
   "version": "0.1.0",
   "pck_name": "EnemyIntentTracker"
 }
