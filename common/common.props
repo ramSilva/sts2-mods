@@ -1,0 +1,45 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Sts2MacAppRoot>$(HOME)/Library/Application Support/Steam/steamapps/common/Slay the Spire 2/SlayTheSpire2.app/Contents</Sts2MacAppRoot>
+
+    <Sts2DataDir Condition="'$(Sts2DataDir)' == '' and Exists('$(Sts2MacAppRoot)/Resources/data_sts2_macos_arm64/sts2.dll')">$(Sts2MacAppRoot)/Resources/data_sts2_macos_arm64</Sts2DataDir>
+
+    <Sts2DataDir Condition="'$(Sts2DataDir)' == '' and Exists('$(Sts2MacAppRoot)/Resources/data_sts2_macos_x86_64/sts2.dll')">$(Sts2MacAppRoot)/Resources/data_sts2_macos_x86_64</Sts2DataDir>
+
+    <Sts2DataDir Condition="'$(Sts2DataDir)' == '' and Exists('C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64\sts2.dll')">C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64</Sts2DataDir>
+
+    <Sts2InstalledModsDir Condition="'$(Sts2InstalledModsDir)' == '' and Exists('$(Sts2MacAppRoot)/MacOS/mods')">$(Sts2MacAppRoot)/MacOS/mods</Sts2InstalledModsDir>
+  </PropertyGroup>
+
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')"
+           Text="Could not locate sts2.dll. Set Sts2DataDir (e.g. -p:Sts2DataDir=/path/to/data_sts2_macos_arm64) and retry." />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="sts2">
+      <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GodotSharp">
+      <HintPath>$(Sts2DataDir)/GodotSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

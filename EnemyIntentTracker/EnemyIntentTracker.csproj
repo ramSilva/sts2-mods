@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../common/common.props" />
+
+  <PropertyGroup>
+    <AssemblyName>EnemyIntentTracker</AssemblyName>
+    <RootNamespace>EnemyIntentTracker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../common/*.cs">
+      <Link>common/%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <Target Name="StageMod" AfterTargets="Build" Condition="'$(SkipStage)' != 'true'">
+    <PropertyGroup>
+      <StageDir>$(MSBuildProjectDirectory)/build/mods/EnemyIntentTracker</StageDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(StageDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/EnemyIntentTracker.json" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/godot/mod_manifest.json" DestinationFolder="$(StageDir)" />
+    <Message Importance="high" Text="Staged EnemyIntentTracker mod to $(StageDir)" />
+  </Target>
+
+</Project>

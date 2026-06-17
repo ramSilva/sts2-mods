@@ -1,0 +1,32 @@
+bin/
+obj/
+build/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+.DS_Store
+
+# Augment agent configuration (workspace-local, not for public)
+.augment/
+.augmentignore
+augment.config*
+
+# Session-local context file (workspace-local notes)
+SESSION_SUMMARY.md
+
+# macOS junk
+._*
+.Spotlight-V100
+.Trashes
+
+# JetBrains
+*.iml
+
+# nuget packages (just-in-case; not currently used but safety net)
+*.nupkg
+packages/
+
+# screenshot capture scratch (never commit)
+/tmp/eit-shots/

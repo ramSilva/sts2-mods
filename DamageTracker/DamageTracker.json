@@ -1,0 +1,10 @@
+{
+  "id": "DamageTracker",
+  "name": "Damage Tracker",
+  "author": "you",
+  "description": "Overlay that tracks damage and block per card / relic / effect across combat, act, and run scopes.",
+  "version": "0.2.0",
+  "has_pck": false,
+  "has_dll": true,
+  "affects_gameplay": false
+}
