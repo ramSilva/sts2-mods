@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using Sts2Mods.Common;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -27,6 +28,13 @@ internal static class NextTurnDamageSimulator
     {
         "POWER.TERRITORIAL_POWER",
     };
+
+    private static readonly HashSet<string> TemporaryStrengthMarkerFallbackIds = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "POWER.PIERCING_WAIL_POWER",
+    };
+
+    private static readonly ConcurrentDictionary<Type, bool> _isTempStrMarkerCache = new();
 
     private static readonly FieldInfo? _moveStateOnPerformField =
         typeof(MoveState).GetField("_onPerform", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -67,6 +75,8 @@ internal static class NextTurnDamageSimulator
             if (currentTurnMoveState != null) dealerStrengthDelta += ReadStrengthDeltaFromMove(currentTurnMoveState, monsterIdForLog, stateIdForLog);
             long recurringStrengthDelta = ReadRecurringStrengthDelta(owner, monsterIdForLog);
             dealerStrengthDelta += recurringStrengthDelta;
+            long tempStrengthReversalDelta = ReadTemporaryStrengthReversalDelta(owner, monsterIdForLog);
+            dealerStrengthDelta += tempStrengthReversalDelta;
 
             long predictedStrength = dealerStrength + dealerStrengthDelta;
 
@@ -134,6 +144,38 @@ internal static class NextTurnDamageSimulator
         }
         return total;
     }
+
+    private static long ReadTemporaryStrengthReversalDelta(object? owner, string monsterIdForLog)
+    {
+        if (owner == null) return 0;
+        long total = 0;
+        foreach (var power in Reflect.IteratePowers(owner))
+        {
+            if (power == null) continue;
+            var type = power.GetType();
+            var pid = Reflect.ReadAny(power, "Id")?.ToString();
+            bool isMarker = IsTemporaryStrengthMarkerType(type)
+                || (pid != null && TemporaryStrengthMarkerFallbackIds.Contains(pid));
+            if (!isMarker) continue;
+            long amount = Reflect.ReadLong(power, "Amount") ?? Reflect.ReadLong(power, "amount") ?? 0;
+            if (amount <= 0) continue;
+            bool skipTick = ReadSkipNextDurationTick(power);
+            long contribution = skipTick ? 0 : amount;
+            total += contribution;
+            ModEntry.Log($"temp-str-reversal: monster={monsterIdForLog} pid={pid} cls={type.Name} amount={amount} skipTick={skipTick} contrib={contribution}");
+        }
+        return total;
+    }
+
+    private static bool IsTemporaryStrengthMarkerType(Type t) =>
+        _isTempStrMarkerCache.GetOrAdd(t, static type =>
+        {
+            for (var cur = type; cur != null; cur = cur.BaseType)
+            {
+                if (cur.Name == "TemporaryStrengthPower") return true;
+            }
+            return false;
+        });
 
     private static long ReadVigorDeltaFromMove(MoveState moveState, string monsterIdForLog, string stateIdForLog)
     {
